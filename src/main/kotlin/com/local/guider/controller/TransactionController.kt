@@ -103,11 +103,15 @@ class TransactionController(
             )
         }
 
-        if (paymentStatus !in PaymentStatus.entries.map { it.value }) {
-            return BaseResponse<Transaction>().failed(
-                message = "Invalid payment status"
-            )
-        }
+        // Log this to see what the frontend is actually sending
+println("Received paymentStatus: $paymentStatus") 
+
+val validStatuses = PaymentStatus.entries.map { it.value.uppercase() }
+if (paymentStatus.uppercase() !in validStatuses) {
+    return BaseResponse<Transaction>().failed(
+        message = "Invalid payment status: $paymentStatus. Expected one of: ${PaymentStatus.entries.map { it.value }}"
+    )
+}
 
         val transaction = transactionService.findByPaymentToken(paymentToken)
             ?: return BaseResponse<Transaction>().failed(
